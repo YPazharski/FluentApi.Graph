@@ -10,7 +10,7 @@ namespace FluentApi.Graph
 {
 	public class DotGraphBuilder
 	{
-        public Graph Graph { get; set; }
+        private protected Graph Graph { get; set; }
 		public static DotGraphBuilder DirectedGraph(string graphName)
 		{
             var graphBuilder = new DotGraphBuilder();
