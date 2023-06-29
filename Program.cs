@@ -12,21 +12,21 @@ namespace FluentApi.Graph
         // Инструкции есть на сайте https://www.graphviz.org/download/
         // Укажите путь до исполняемого файла dot в константе ниже:
 
-        private const string PathToGraphviz = @"c:\Program Files (x86)\Graphviz2.38\bin\dot.exe";
+        private const string PathToGraphviz = @"C:\Program Files\Graphviz\bin\dot.exe";
 
         static void Main(string[] args)
         {
-            var dot =
-                DotGraphBuilder.DirectedGraph("CommentParser")
-                    .AddNode("START").With(a => a.Shape(NodeShape.Ellipse).Color("green"))
-                    .AddNode("comment").With(a => a.Shape(NodeShape.Box))
-                    .AddEdge("START", "slash").With(a => a.Label("'/'"))
-                    .AddEdge("slash", "comment").With(a => a.Label("'/'"))
-                    .AddEdge("comment", "comment").With(a => a.Label("other chars"))
-                    .AddEdge("comment", "START").With(a => a.Label("'\\\\n'"))
-                    .Build();
-            Console.WriteLine(dot);
-            ShowRenderedGraph(dot);
+            //var dot =
+            //    DotGraphBuilder.DirectedGraph("CommentParser")
+            //        .AddNode("START").With(a => a.Shape(NodeShape.Ellipse).Color("green"))
+            //        .AddNode("comment").With(a => a.Shape(NodeShape.Box))
+            //        .AddEdge("START", "slash").With(a => a.Label("'/'"))
+            //        .AddEdge("slash", "comment").With(a => a.Label("'/'"))
+            //        .AddEdge("comment", "comment").With(a => a.Label("other chars"))
+            //        .AddEdge("comment", "START").With(a => a.Label("'\\\\n'"))
+            //        .Build();
+            //Console.WriteLine(dot);
+            //ShowRenderedGraph(dot);
         }
 
         private static void ShowRenderedGraph(string dot)
