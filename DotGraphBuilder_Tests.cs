@@ -17,22 +17,22 @@ namespace FluentApi.Graph
         //    AssertAreSame("digraph EmptyGraph { }", dot);
         //}
 
-        [Test]
-        public void EmptyUndirectedGraph()
-        {
-            var dot = DotGraphBuilder.UndirectedGraph("EmptyGraph").Build();
-            AssertAreSame("graph EmptyGraph { }", dot);
-        }
-
         //[Test]
-        //public void JustNodes()
+        //public void EmptyUndirectedGraph()
         //{
-        //    var dot = DotGraphBuilder.DirectedGraph("NoEdges")
-        //        .AddNode("n1")
-        //        .AddNode("n2")
-        //        .Build();
-        //    AssertAreSame("digraph NoEdges { n1; n2 }", dot);
+        //    var dot = DotGraphBuilder.UndirectedGraph("EmptyGraph").Build();
+        //    AssertAreSame("graph EmptyGraph { }", dot);
         //}
+
+        [Test]
+        public void JustNodes()
+        {
+            var dot = DotGraphBuilder.DirectedGraph("NoEdges")
+                .AddNode("n1")
+                .AddNode("n2")
+                .Build();
+            AssertAreSame("digraph NoEdges { n1; n2 }", dot);
+        }
 
         //[Test]
         //public void JustNodesWithAttributes()

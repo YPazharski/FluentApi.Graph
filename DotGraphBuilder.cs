@@ -16,9 +16,11 @@ namespace FluentApi.Graph
             return graphBuilder;
 		}
 
-        internal DotGraphBuilder UndirectedGraph(string graphName)
+        public static DotGraphBuilder UndirectedGraph(string graphName)
         {
-            throw new NotImplementedException();
+            var graphBuilder = new DotGraphBuilder();
+            graphBuilder.Graph = new Graph(graphName, false, true);
+            return graphBuilder;
         }
 
         internal DotGraphBuilder AddEdge(string firstNode, string secondNode)
