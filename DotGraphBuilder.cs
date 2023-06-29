@@ -27,7 +27,8 @@ namespace FluentApi.Graph
 
         internal DotGraphBuilder AddEdge(string firstNode, string secondNode)
         {
-            throw new NotImplementedException();
+            Graph.AddEdge(firstNode, secondNode);
+            return this;
         }
 
         internal DotGraphBuilder AddNode(string nodeName)
