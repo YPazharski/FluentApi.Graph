@@ -30,7 +30,8 @@ namespace FluentApi.Graph
 
         internal DotGraphBuilder AddNode(string nodeName)
         {
-            throw new NotImplementedException();
+            Graph.AddNode(nodeName);
+            return this;
         }
 
         internal string Build()
