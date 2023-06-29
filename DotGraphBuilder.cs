@@ -25,30 +25,65 @@ namespace FluentApi.Graph
             return graphBuilder;
         }
 
-        internal DotGraphBuilder AddEdge(string firstNode, string secondNode)
+        public DotGraphBuilderEdged AddEdge(string firstNode, string secondNode)
         {
             Graph.AddEdge(firstNode, secondNode);
-            return this;
+            return new DotGraphBuilderEdged { Graph = Graph };
         }
 
-        internal DotGraphBuilder AddNode(string nodeName)
+        public DotGraphBuilderNoded AddNode(string nodeName)
         {
             Graph.AddNode(nodeName);
-            return this;
+            return new DotGraphBuilderNoded { Graph = Graph };
         }
 
-        internal string Build()
+        public string Build()
         {
             return Graph.ToDotFormat();
         }
+    }
 
-        public DotGraphBuilder With(Func<NodeAttributes, NodeAttributes> nodeAttributesSetter)
+    public class DotGraphBuilderNoded : DotGraphBuilder
+    {
+        private string color;
+        private int fontsize;
+        private string label;
+        private NodeShape shape;
+
+        public DotGraphBuilderNoded Color(string color)
         {
-            var attributes = nodeAttributesSetter(new NodeAttributes());
+            this.color = color;
+            return this;
+        }
+
+        public DotGraphBuilderNoded FontSize(int fontSize)
+        {
+            if (fontSize < 0)
+                throw new ArgumentException($"font size of {fontSize} is less than 0!");
+            this.fontsize = fontSize;
+            return this;
+        }
+
+        public DotGraphBuilderNoded Label(string label)
+        {
+            this.label = label; 
+            return this;    
+        }
+
+        public DotGraphBuilderNoded Shape(NodeShape shape)
+        {
+            this.shape = shape;
+            return this;
+        }
+
+        public DotGraphBuilder With(Func<DotGraphBuilderNoded, DotGraphBuilderNoded> nodeAttributesSetter)
+        {
+            var attributes = nodeAttributesSetter(new DotGraphBuilderNoded());
             var latestNode = Graph?.Nodes.LastOrDefault();
             if (latestNode == null)
                 throw new InvalidOperationException("There are no graph or nodes in the graph!");
-            var nodeAttributesFields = typeof(NodeAttributes).GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+            var nodeAttributesFields = typeof(DotGraphBuilderNoded).GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+            var a = nodeAttributesFields.OrderBy(c => c.Name).ThenBy(b => b.Name);
             foreach (var nodeAttributesField in nodeAttributesFields)
             {
                 var value = nodeAttributesField.GetValue(attributes);
@@ -68,20 +103,19 @@ namespace FluentApi.Graph
         }
     }
 
-    public class NodeAttributes
+    public class DotGraphBuilderEdged : DotGraphBuilder
     {
         private string color;
         private int fontsize;
         private string label;
-        private NodeShape shape;
-
-        public NodeAttributes Color(string color)
+        private double weight;
+        public DotGraphBuilderEdged Color(string color)
         {
             this.color = color;
             return this;
         }
 
-        public NodeAttributes FontSize(int fontSize)
+        public DotGraphBuilderEdged FontSize(int fontSize)
         {
             if (fontSize < 0)
                 throw new ArgumentException($"font size of {fontSize} is less than 0!");
@@ -89,15 +123,41 @@ namespace FluentApi.Graph
             return this;
         }
 
-        public NodeAttributes Label(string label)
+        public DotGraphBuilderEdged Label(string label)
         {
-            this.label = label; 
-            return this;    
+            this.label = label;
+            return this;
         }
 
-        public NodeAttributes Shape(NodeShape shape)
+        public DotGraphBuilderEdged Weight(double weight)
         {
-            this.shape = shape;
+            this.weight = weight;
+            return this;
+        }
+
+        public DotGraphBuilder With(Func<DotGraphBuilderEdged, DotGraphBuilderEdged> edgeAttributesSetter)
+        {
+            var attributes = edgeAttributesSetter(new DotGraphBuilderEdged());
+            var latestEdge = Graph?.Edges.LastOrDefault();
+            if (latestEdge == null)
+                throw new InvalidOperationException("There are no graph or edges in the graph!");
+            var edgeAttributesFields = typeof(DotGraphBuilderEdged).GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+            var a = edgeAttributesFields.OrderBy(c => c.Name).ThenBy(b => b.Name);
+            foreach (var edgeAttributesField in edgeAttributesFields)
+            {
+                var value = edgeAttributesField.GetValue(attributes);
+                if (value == null)
+                    continue;
+                var valueType = value.GetType();
+                if (valueType.IsValueType)
+                {
+                    var defaultValue = Activator.CreateInstance(valueType);
+                    if (value.Equals(defaultValue))
+                        continue;
+                }
+                var key = edgeAttributesField.Name.ToLower();
+                latestEdge.Attributes.Add(key, value.ToString().ToLower());
+            }
             return this;
         }
     }

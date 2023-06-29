@@ -10,52 +10,52 @@ namespace FluentApi.Graph
     [TestFixture]
     public class DotGraphBuilder_Tests
     {
-        //[Test]
-        //public void EmptyDirectedGraph()
-        //{
-        //    var dot = DotGraphBuilder.DirectedGraph("EmptyGraph").Build();
-        //    AssertAreSame("digraph EmptyGraph { }", dot);
-        //}
+        [Test]
+        public void EmptyDirectedGraph()
+        {
+            var dot = DotGraphBuilder.DirectedGraph("EmptyGraph").Build();
+            AssertAreSame("digraph EmptyGraph { }", dot);
+        }
 
-        //[Test]
-        //public void EmptyUndirectedGraph()
-        //{
-        //    var dot = DotGraphBuilder.UndirectedGraph("EmptyGraph").Build();
-        //    AssertAreSame("graph EmptyGraph { }", dot);
-        //}
+        [Test]
+        public void EmptyUndirectedGraph()
+        {
+            var dot = DotGraphBuilder.UndirectedGraph("EmptyGraph").Build();
+            AssertAreSame("graph EmptyGraph { }", dot);
+        }
 
-        //[Test]
-        //public void JustNodes()
-        //{
-        //    var dot = DotGraphBuilder.DirectedGraph("NoEdges")
-        //        .AddNode("n1")
-        //        .AddNode("n2")
-        //        .Build();
-        //    AssertAreSame("digraph NoEdges { n1; n2 }", dot);
-        //}
+        [Test]
+        public void JustNodes()
+        {
+            var dot = DotGraphBuilder.DirectedGraph("NoEdges")
+                .AddNode("n1")
+                .AddNode("n2")
+                .Build();
+            AssertAreSame("digraph NoEdges { n1; n2 }", dot);
+        }
 
-        //[Test]
-        //public void JustNodesWithAttributes()
-        //{
-        //    var dot = DotGraphBuilder.DirectedGraph("NoEdges")
-        //        .AddNode("n1").With(c => c.Color("black").Shape(NodeShape.Box))
-        //        .AddNode("n2").With(c => c.Shape(NodeShape.Ellipse).FontSize(12).Label("node №2"))
-        //        .Build();
-        //    AssertAreSame(@"digraph NoEdges { 
-        //    n1 [color=black; shape=box]; n2 [fontsize=12; label=""node №2""; shape=ellipse] }", dot);
-        //}
+        [Test]
+        public void JustNodesWithAttributes()
+        {
+            var dot = DotGraphBuilder.DirectedGraph("NoEdges")
+                .AddNode("n1").With(c => c.Color("black").Shape(NodeShape.Box))
+                .AddNode("n2").With(c => c.Shape(NodeShape.Ellipse).FontSize(12).Label("node №2"))
+                .Build();
+            AssertAreSame(@"digraph NoEdges { 
+            n1 [color=black; shape=box]; n2 [fontsize=12; label=""node №2""; shape=ellipse] }", dot);
+        }
 
-        //[Test]
-        //public void JustEdges()
-        //{
-        //    var dot =
-        //        DotGraphBuilder
-        //            .DirectedGraph("G")
-        //            .AddEdge("a", "b")
-        //            .AddEdge("a", "x")
-        //            .Build();
-        //    AssertAreSame("digraph G { a -> b; a -> x }", dot);
-        //}
+        [Test]
+        public void JustEdges()
+        {
+            var dot =
+                DotGraphBuilder
+                    .DirectedGraph("G")
+                    .AddEdge("a", "b")
+                    .AddEdge("a", "x")
+                    .Build();
+            AssertAreSame("digraph G { a -> b; a -> x }", dot);
+        }
 
         [Test]
         public void JustEdgesWithAttributes()
@@ -71,17 +71,17 @@ namespace FluentApi.Graph
             a -- b [color=black; fontsize=12; label=ab]; a -- x; x -- y [color=red; weight=2] }", dot);
         }
 
-        //[Test]
-        //public void NodesBeforeEdges()
-        //{
-        //    var dot =
-        //        DotGraphBuilder
-        //            .UndirectedGraph("G")
-        //            .AddNode("b").With(a => a.Shape(NodeShape.Box))
-        //            .AddEdge("a", "b").With(e => e.Weight(3.14))
-        //            .Build();
-        //    AssertAreSame("graph G { b [shape=box]; a -- b [weight=3.14] }", dot);
-        //}
+        [Test]
+        public void NodesBeforeEdges()
+        {
+            var dot =
+                DotGraphBuilder
+                    .UndirectedGraph("G")
+                    .AddNode("b").With(a => a.Shape(NodeShape.Box))
+                    .AddEdge("a", "b").With(e => e.Weight(3.14))
+                    .Build();
+            AssertAreSame("graph G { b [shape=box]; a -- b [weight=3.14] }", dot);
+        }
 
         //[Test]
         //public void EdgesBeforeNodes()
