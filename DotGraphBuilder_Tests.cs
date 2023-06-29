@@ -10,19 +10,19 @@ namespace FluentApi.Graph
     [TestFixture]
     public class DotGraphBuilder_Tests
     {
-        [Test]
-        public void EmptyDirectedGraph()
-        {
-            var dot = DotGraphBuilder.DirectedGraph("EmptyGraph").Build();
-            AssertAreSame("digraph EmptyGraph { }", dot);
-        }
-
         //[Test]
-        //public void EmptyUndirectedGraph()
+        //public void EmptyDirectedGraph()
         //{
-        //    var dot = DotGraphBuilder.UndirectedGraph("EmptyGraph").Build();
-        //    AssertAreSame("graph EmptyGraph { }", dot);
+        //    var dot = DotGraphBuilder.DirectedGraph("EmptyGraph").Build();
+        //    AssertAreSame("digraph EmptyGraph { }", dot);
         //}
+
+        [Test]
+        public void EmptyUndirectedGraph()
+        {
+            var dot = DotGraphBuilder.UndirectedGraph("EmptyGraph").Build();
+            AssertAreSame("graph EmptyGraph { }", dot);
+        }
 
         //[Test]
         //public void JustNodes()

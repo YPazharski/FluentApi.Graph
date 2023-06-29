@@ -1,18 +1,22 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace FluentApi.Graph
 {
 	public class DotGraphBuilder
 	{
+        public Graph Graph { get; set; }
 		public static DotGraphBuilder DirectedGraph(string graphName)
 		{
-			throw new NotImplementedException();
+            var graphBuilder = new DotGraphBuilder();
+            graphBuilder.Graph = new Graph(graphName, true, false);
+            return graphBuilder;
 		}
 
-        internal static DotGraphBuilder UndirectedGraph(string graphName)
+        internal DotGraphBuilder UndirectedGraph(string graphName)
         {
             throw new NotImplementedException();
         }
@@ -29,7 +33,7 @@ namespace FluentApi.Graph
 
         internal string Build()
         {
-            throw new NotImplementedException();
+            return Graph.ToDotFormat();
         }
 
         internal DotGraphBuilder With(Func<object, object> value)
