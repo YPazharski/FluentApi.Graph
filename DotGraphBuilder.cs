@@ -25,16 +25,16 @@ namespace FluentApi.Graph
             return graphBuilder;
         }
 
-        public DotGraphBuilderEdged AddEdge(string firstNode, string secondNode)
+        public DotGraphEdgeBuilder AddEdge(string firstNode, string secondNode)
         {
             Graph.AddEdge(firstNode, secondNode);
-            return new DotGraphBuilderEdged { Graph = Graph };
+            return new DotGraphEdgeBuilder { Graph = Graph };
         }
 
-        public DotGraphBuilderNoded AddNode(string nodeName)
+        public DotGraphNodeBuilder AddNode(string nodeName)
         {
             Graph.AddNode(nodeName);
-            return new DotGraphBuilderNoded { Graph = Graph };
+            return new DotGraphNodeBuilder { Graph = Graph };
         }
 
         public string Build()
@@ -43,20 +43,26 @@ namespace FluentApi.Graph
         }
     }
 
-    public class DotGraphBuilderNoded : DotGraphBuilder
+    public class DotGraphNodeBuilder : DotGraphBuilder
     {
         private string color;
         private int fontsize;
         private string label;
         private NodeShape shape;
+        private static readonly FieldInfo[] nodeAttributesFields;
+        static DotGraphNodeBuilder()
+        {
+            nodeAttributesFields = typeof(DotGraphNodeBuilder)
+                .GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+        }
 
-        public DotGraphBuilderNoded Color(string color)
+        public DotGraphNodeBuilder Color(string color)
         {
             this.color = color;
             return this;
         }
 
-        public DotGraphBuilderNoded FontSize(int fontSize)
+        public DotGraphNodeBuilder FontSize(int fontSize)
         {
             if (fontSize < 0)
                 throw new ArgumentException($"font size of {fontSize} is less than 0!");
@@ -64,26 +70,25 @@ namespace FluentApi.Graph
             return this;
         }
 
-        public DotGraphBuilderNoded Label(string label)
+        public DotGraphNodeBuilder Label(string label)
         {
             this.label = label; 
             return this;    
         }
 
-        public DotGraphBuilderNoded Shape(NodeShape shape)
+        public DotGraphNodeBuilder Shape(NodeShape shape)
         {
             this.shape = shape;
             return this;
         }
 
-        public DotGraphBuilder With(Func<DotGraphBuilderNoded, DotGraphBuilderNoded> nodeAttributesSetter)
+        public DotGraphBuilder With(Action<DotGraphNodeBuilder> nodeAttributesSetter)
         {
-            var attributes = nodeAttributesSetter(new DotGraphBuilderNoded());
+            var attributes = new DotGraphNodeBuilder();
+            nodeAttributesSetter(attributes);
             var latestNode = Graph?.Nodes.LastOrDefault();
             if (latestNode == null)
                 throw new InvalidOperationException("There are no graph or nodes in the graph!");
-            var nodeAttributesFields = typeof(DotGraphBuilderNoded).GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
-            var a = nodeAttributesFields.OrderBy(c => c.Name).ThenBy(b => b.Name);
             foreach (var nodeAttributesField in nodeAttributesFields)
             {
                 var value = nodeAttributesField.GetValue(attributes);
@@ -97,25 +102,34 @@ namespace FluentApi.Graph
                         continue;
                 }
                 var key = nodeAttributesField.Name.ToLower();
-                latestNode.Attributes.Add(key, value.ToString().ToLower());
+                var stringedValue = Convert.ToString(value, CultureInfo.InvariantCulture).ToLowerInvariant();
+                latestNode.Attributes.Add(key, stringedValue);
             }
             return this;
         }
     }
 
-    public class DotGraphBuilderEdged : DotGraphBuilder
+    public class DotGraphEdgeBuilder : DotGraphBuilder
     {
         private string color;
         private int fontsize;
         private string label;
         private double weight;
-        public DotGraphBuilderEdged Color(string color)
+        private static readonly FieldInfo[] edgeAttributesFields;
+        static DotGraphEdgeBuilder()
+        {
+            edgeAttributesFields = typeof(DotGraphEdgeBuilder)
+                .GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+
+        }
+
+        public DotGraphEdgeBuilder Color(string color)
         {
             this.color = color;
             return this;
         }
 
-        public DotGraphBuilderEdged FontSize(int fontSize)
+        public DotGraphEdgeBuilder FontSize(int fontSize)
         {
             if (fontSize < 0)
                 throw new ArgumentException($"font size of {fontSize} is less than 0!");
@@ -123,26 +137,25 @@ namespace FluentApi.Graph
             return this;
         }
 
-        public DotGraphBuilderEdged Label(string label)
+        public DotGraphEdgeBuilder Label(string label)
         {
             this.label = label;
             return this;
         }
 
-        public DotGraphBuilderEdged Weight(double weight)
+        public DotGraphEdgeBuilder Weight(double weight)
         {
             this.weight = weight;
             return this;
         }
 
-        public DotGraphBuilder With(Func<DotGraphBuilderEdged, DotGraphBuilderEdged> edgeAttributesSetter)
+        public DotGraphBuilder With(Action<DotGraphEdgeBuilder> edgeAttributesSetter)
         {
-            var attributes = edgeAttributesSetter(new DotGraphBuilderEdged());
+            var attributes = new DotGraphEdgeBuilder();
+            edgeAttributesSetter(attributes);
             var latestEdge = Graph?.Edges.LastOrDefault();
             if (latestEdge == null)
                 throw new InvalidOperationException("There are no graph or edges in the graph!");
-            var edgeAttributesFields = typeof(DotGraphBuilderEdged).GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
-            var a = edgeAttributesFields.OrderBy(c => c.Name).ThenBy(b => b.Name);
             foreach (var edgeAttributesField in edgeAttributesFields)
             {
                 var value = edgeAttributesField.GetValue(attributes);
@@ -156,7 +169,8 @@ namespace FluentApi.Graph
                         continue;
                 }
                 var key = edgeAttributesField.Name.ToLower();
-                latestEdge.Attributes.Add(key, value.ToString().ToLower());
+                var stringedValue = Convert.ToString(value, CultureInfo.InvariantCulture).ToLowerInvariant();
+                latestEdge.Attributes.Add(key, stringedValue);
             }
             return this;
         }
