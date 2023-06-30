@@ -26,10 +26,10 @@ namespace FluentApi.Graph
             return graphBuilder;
         }
 
-        public DotGraphEdgeBuilder AddEdge(string firstNode, string secondNode)
+        public EdgedDotGraphBuilder AddEdge(string firstNode, string secondNode)
         {
             Graph.AddEdge(firstNode, secondNode);
-            return new DotGraphEdgeBuilder { Graph = Graph };
+            return new EdgedDotGraphBuilder { Graph = Graph };
         }
 
         public NodedDotGraphBuilder AddNode(string nodeName)
@@ -46,7 +46,7 @@ namespace FluentApi.Graph
 
     public class NodedDotGraphBuilder : DotGraphBuilder
     {
-        public NodedDotGraphBuilder With(Action<DotGraphNodeAttributesBuilder> nodeAttributesSetter)
+        public DotGraphBuilder With(Action<DotGraphNodeAttributesBuilder> nodeAttributesSetter)
         {
             var lastNode = Graph?.Nodes?.Last();
             var nodeAttributesBuilder = new DotGraphNodeAttributesBuilder(lastNode);
@@ -90,7 +90,7 @@ namespace FluentApi.Graph
         }
     }
 
-    public class DotGraphEdgeBuilder : DotGraphBuilder
+    public class EdgedDotGraphBuilder : DotGraphBuilder
     {
         public DotGraphBuilder With(Action<DotGraphEdgeAttributesBuilder> edgeAttributesSetter)
         {
