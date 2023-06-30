@@ -32,10 +32,10 @@ namespace FluentApi.Graph
             return new DotGraphEdgeBuilder { Graph = Graph };
         }
 
-        public DotGraphNodeBuilder AddNode(string nodeName)
+        public NodedDotGraphBuilder AddNode(string nodeName)
         {
             Graph.AddNode(nodeName);
-            return new DotGraphNodeBuilder { Graph = Graph };
+            return new NodedDotGraphBuilder { Graph = Graph };
         }
 
         public string Build()
@@ -44,7 +44,17 @@ namespace FluentApi.Graph
         }
     }
 
-    public class DotGraphNodeBuilder : DotGraphBuilder
+    public class NodedDotGraphBuilder : DotGraphBuilder
+    {
+        public NodedDotGraphBuilder With(Action<DotGraphNodeModifier> nodeAttributesSetter)
+        {
+            var graphModifier = new DotGraphNodeModifier { Graph = Graph };
+            nodeAttributesSetter(graphModifier);
+            return graphModifier;
+        }
+    }
+
+    public class DotGraphNodeModifier : NodedDotGraphBuilder
     {
         private Dictionary<string, string> GetLastNodeAttributes(Graph graph)
         {
@@ -54,34 +64,28 @@ namespace FluentApi.Graph
             return attributes;
         }
 
-        private DotGraphNodeBuilder AddAttribute(string name, string value)
+        private DotGraphNodeModifier AddAttribute(string name, string value)
         {
             var attributes = GetLastNodeAttributes(Graph);
             attributes.Add(name, value);
             return this;
         }
 
-        public DotGraphNodeBuilder Color(string color) =>
+        public DotGraphNodeModifier Color(string color) =>
             AddAttribute("color", color);
 
-        public DotGraphNodeBuilder FontSize(int fontSize) =>
+        public DotGraphNodeModifier FontSize(int fontSize) =>
             AddAttribute("fontsize", Convert.ToString(fontSize, CultureInfo.InvariantCulture));
 
-        public DotGraphNodeBuilder Label(string label) =>
+        public DotGraphNodeModifier Label(string label) =>
             AddAttribute("label", label);
 
-        public DotGraphNodeBuilder Shape(NodeShape shape)
+        public DotGraphNodeModifier Shape(NodeShape shape)
         {
             var shapeString = Convert
                 .ToString(shape, CultureInfo.InvariantCulture)
                 .ToLowerInvariant();
             AddAttribute("shape", shapeString);
-            return this;
-        }
-
-        public DotGraphBuilder With(Action<DotGraphNodeBuilder> nodeAttributesSetter)
-        {
-            nodeAttributesSetter(this);
             return this;
         }
     }
