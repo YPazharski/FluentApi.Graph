@@ -88,67 +88,36 @@ namespace FluentApi.Graph
 
     public class DotGraphEdgeBuilder : DotGraphBuilder
     {
-        private string color;
-        private int fontsize;
-        private string label;
-        private double weight;
-        private static readonly FieldInfo[] edgeAttributesFields;
-        static DotGraphEdgeBuilder()
+        private Dictionary<string, string> GetLastNodeAttributes(Graph graph)
         {
-            edgeAttributesFields = typeof(DotGraphEdgeBuilder)
-                .GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
-
+            var attributes = Graph?.Edges?.Last()?.Attributes;
+            if (attributes == null)
+                throw new InvalidOperationException("There are no graph or edges in the graph!");
+            return attributes;
         }
 
-        public DotGraphEdgeBuilder Color(string color)
+        private DotGraphEdgeBuilder AddAttribute(string name, string value)
         {
-            this.color = color;
+            var attributes = GetLastNodeAttributes(Graph);
+            attributes.Add(name, value);
             return this;
         }
 
-        public DotGraphEdgeBuilder FontSize(int fontSize)
-        {
-            if (fontSize < 0)
-                throw new ArgumentException($"font size of {fontSize} is less than 0!");
-            this.fontsize = fontSize;
-            return this;
-        }
+        public DotGraphEdgeBuilder Color(string color) =>
+             AddAttribute("color", color);
 
-        public DotGraphEdgeBuilder Label(string label)
-        {
-            this.label = label;
-            return this;
-        }
+        public DotGraphEdgeBuilder FontSize(int fontSize) =>
+            AddAttribute("fontsize", Convert.ToString(fontSize, CultureInfo.InvariantCulture));
 
-        public DotGraphEdgeBuilder Weight(double weight)
-        {
-            this.weight = weight;
-            return this;
-        }
+        public DotGraphEdgeBuilder Label(string label) =>
+            AddAttribute("label", label);
+
+        public DotGraphEdgeBuilder Weight(double weight) =>
+            AddAttribute("weight", Convert.ToString(weight, CultureInfo.InvariantCulture));
 
         public DotGraphBuilder With(Action<DotGraphEdgeBuilder> edgeAttributesSetter)
         {
-            var attributes = new DotGraphEdgeBuilder();
-            edgeAttributesSetter(attributes);
-            var latestEdge = Graph?.Edges.LastOrDefault();
-            if (latestEdge == null)
-                throw new InvalidOperationException("There are no graph or edges in the graph!");
-            foreach (var edgeAttributesField in edgeAttributesFields)
-            {
-                var value = edgeAttributesField.GetValue(attributes);
-                if (value == null)
-                    continue;
-                var valueType = value.GetType();
-                if (valueType.IsValueType)
-                {
-                    var defaultValue = Activator.CreateInstance(valueType);
-                    if (value.Equals(defaultValue))
-                        continue;
-                }
-                var key = edgeAttributesField.Name.ToLower();
-                var stringedValue = Convert.ToString(value, CultureInfo.InvariantCulture).ToLowerInvariant();
-                latestEdge.Attributes.Add(key, stringedValue);
-            }
+            edgeAttributesSetter(this);
             return this;
         }
     }
