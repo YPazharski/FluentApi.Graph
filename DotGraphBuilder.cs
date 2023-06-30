@@ -46,41 +46,41 @@ namespace FluentApi.Graph
 
     public class NodedDotGraphBuilder : DotGraphBuilder
     {
-        public NodedDotGraphBuilder With(Action<DotGraphNodeModifier> nodeAttributesSetter)
+        public NodedDotGraphBuilder With(Action<DotGraphNodeAttributesBuilder> nodeAttributesSetter)
         {
-            var graphModifier = new DotGraphNodeModifier { Graph = Graph };
-            nodeAttributesSetter(graphModifier);
-            return graphModifier;
+            var lastNode = Graph?.Nodes?.Last();
+            var nodeAttributesBuilder = new DotGraphNodeAttributesBuilder(lastNode);
+            nodeAttributesSetter(nodeAttributesBuilder);
+            return this;
         }
     }
 
-    public class DotGraphNodeModifier : NodedDotGraphBuilder
+    public class DotGraphNodeAttributesBuilder
     {
-        private Dictionary<string, string> GetLastNodeAttributes(Graph graph)
+        private Dictionary<string, string> Attributes { get; }
+        public DotGraphNodeAttributesBuilder(GraphNode node)
         {
-            var attributes = Graph?.Nodes?.Last()?.Attributes;
-            if (attributes == null)
-                throw new InvalidOperationException("There are no graph or nodes in the graph!");
-            return attributes;
+            if (node == null)
+                throw new ArgumentNullException(nameof(node));
+            Attributes = node.Attributes;
         }
 
-        private DotGraphNodeModifier AddAttribute(string name, string value)
+        private DotGraphNodeAttributesBuilder AddAttribute(string name, string value)
         {
-            var attributes = GetLastNodeAttributes(Graph);
-            attributes.Add(name, value);
+            Attributes.Add(name, value);
             return this;
         }
 
-        public DotGraphNodeModifier Color(string color) =>
+        public DotGraphNodeAttributesBuilder Color(string color) =>
             AddAttribute("color", color);
 
-        public DotGraphNodeModifier FontSize(int fontSize) =>
+        public DotGraphNodeAttributesBuilder FontSize(int fontSize) =>
             AddAttribute("fontsize", Convert.ToString(fontSize, CultureInfo.InvariantCulture));
 
-        public DotGraphNodeModifier Label(string label) =>
+        public DotGraphNodeAttributesBuilder Label(string label) =>
             AddAttribute("label", label);
 
-        public DotGraphNodeModifier Shape(NodeShape shape)
+        public DotGraphNodeAttributesBuilder Shape(NodeShape shape)
         {
             var shapeString = Convert
                 .ToString(shape, CultureInfo.InvariantCulture)
@@ -92,38 +92,42 @@ namespace FluentApi.Graph
 
     public class DotGraphEdgeBuilder : DotGraphBuilder
     {
-        private Dictionary<string, string> GetLastNodeAttributes(Graph graph)
+        public DotGraphBuilder With(Action<DotGraphEdgeAttributesBuilder> edgeAttributesSetter)
         {
-            var attributes = Graph?.Edges?.Last()?.Attributes;
-            if (attributes == null)
-                throw new InvalidOperationException("There are no graph or edges in the graph!");
-            return attributes;
+            var lastEdge = Graph?.Edges?.Last();
+            var graphEdgeAttributesBuilder = new DotGraphEdgeAttributesBuilder(lastEdge);
+            edgeAttributesSetter(graphEdgeAttributesBuilder);
+            return this;
+        }
+    }
+
+    public class DotGraphEdgeAttributesBuilder
+    {
+        private Dictionary<string, string> Attributes { get; }
+        public DotGraphEdgeAttributesBuilder(GraphEdge graphEdge)
+        {
+            if (graphEdge == null)
+                throw new ArgumentNullException(nameof(graphEdge));
+            Attributes = graphEdge.Attributes;
         }
 
-        private DotGraphEdgeBuilder AddAttribute(string name, string value)
+        private DotGraphEdgeAttributesBuilder AddAttribute(string name, string value)
         {
-            var attributes = GetLastNodeAttributes(Graph);
-            attributes.Add(name, value);
+            Attributes.Add(name, value);
             return this;
         }
 
-        public DotGraphEdgeBuilder Color(string color) =>
+        public DotGraphEdgeAttributesBuilder Color(string color) =>
              AddAttribute("color", color);
 
-        public DotGraphEdgeBuilder FontSize(int fontSize) =>
+        public DotGraphEdgeAttributesBuilder FontSize(int fontSize) =>
             AddAttribute("fontsize", Convert.ToString(fontSize, CultureInfo.InvariantCulture));
 
-        public DotGraphEdgeBuilder Label(string label) =>
+        public DotGraphEdgeAttributesBuilder Label(string label) =>
             AddAttribute("label", label);
 
-        public DotGraphEdgeBuilder Weight(double weight) =>
+        public DotGraphEdgeAttributesBuilder Weight(double weight) =>
             AddAttribute("weight", Convert.ToString(weight, CultureInfo.InvariantCulture));
-
-        public DotGraphBuilder With(Action<DotGraphEdgeBuilder> edgeAttributesSetter)
-        {
-            edgeAttributesSetter(this);
-            return this;
-        }
     }
 
     public enum NodeShape
