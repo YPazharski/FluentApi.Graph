@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Reflection;
 using System.CodeDom;
+using System.Collections.Generic;
 
 namespace FluentApi.Graph
 {
@@ -45,66 +46,42 @@ namespace FluentApi.Graph
 
     public class DotGraphNodeBuilder : DotGraphBuilder
     {
-        private string color;
-        private int fontsize;
-        private string label;
-        private NodeShape shape;
-        private static readonly FieldInfo[] nodeAttributesFields;
-        static DotGraphNodeBuilder()
+        private Dictionary<string, string> GetLastNodeAttributes(Graph graph)
         {
-            nodeAttributesFields = typeof(DotGraphNodeBuilder)
-                .GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+            var attributes = Graph?.Nodes?.Last()?.Attributes;
+            if (attributes == null)
+                throw new InvalidOperationException("There are no graph or nodes in the graph!");
+            return attributes;
         }
 
-        public DotGraphNodeBuilder Color(string color)
+        private DotGraphNodeBuilder AddAttribute(string name, string value)
         {
-            this.color = color;
+            var attributes = GetLastNodeAttributes(Graph);
+            attributes.Add(name, value);
             return this;
         }
 
-        public DotGraphNodeBuilder FontSize(int fontSize)
-        {
-            if (fontSize < 0)
-                throw new ArgumentException($"font size of {fontSize} is less than 0!");
-            this.fontsize = fontSize;
-            return this;
-        }
+        public DotGraphNodeBuilder Color(string color) =>
+            AddAttribute("color", color);
 
-        public DotGraphNodeBuilder Label(string label)
-        {
-            this.label = label; 
-            return this;    
-        }
+        public DotGraphNodeBuilder FontSize(int fontSize) =>
+            AddAttribute("fontsize", Convert.ToString(fontSize, CultureInfo.InvariantCulture));
+
+        public DotGraphNodeBuilder Label(string label) =>
+            AddAttribute("label", label);
 
         public DotGraphNodeBuilder Shape(NodeShape shape)
         {
-            this.shape = shape;
+            var shapeString = Convert
+                .ToString(shape, CultureInfo.InvariantCulture)
+                .ToLowerInvariant();
+            AddAttribute("shape", shapeString);
             return this;
         }
 
         public DotGraphBuilder With(Action<DotGraphNodeBuilder> nodeAttributesSetter)
         {
-            var attributes = new DotGraphNodeBuilder();
-            nodeAttributesSetter(attributes);
-            var latestNode = Graph?.Nodes.LastOrDefault();
-            if (latestNode == null)
-                throw new InvalidOperationException("There are no graph or nodes in the graph!");
-            foreach (var nodeAttributesField in nodeAttributesFields)
-            {
-                var value = nodeAttributesField.GetValue(attributes);
-                if (value == null)
-                    continue;
-                var valueType = value.GetType();
-                if (valueType.IsValueType)
-                {
-                    var defaultValue = Activator.CreateInstance(valueType);
-                    if (value.Equals(defaultValue))
-                        continue;
-                }
-                var key = nodeAttributesField.Name.ToLower();
-                var stringedValue = Convert.ToString(value, CultureInfo.InvariantCulture).ToLowerInvariant();
-                latestNode.Attributes.Add(key, stringedValue);
-            }
+            nodeAttributesSetter(this);
             return this;
         }
     }
