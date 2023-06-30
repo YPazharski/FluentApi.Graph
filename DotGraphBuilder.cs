@@ -29,7 +29,7 @@ namespace FluentApi.Graph
         public EdgedDotGraphBuilder AddEdge(string firstNode, string secondNode)
         {
             Graph.AddEdge(firstNode, secondNode);
-            return new EdgedDotGraphBuilder { Graph = Graph };
+            return new EdgedDotGraphBuilder(Graph);
         }
 
         public NodedDotGraphBuilder AddNode(string nodeName)
@@ -92,10 +92,19 @@ namespace FluentApi.Graph
 
     public class EdgedDotGraphBuilder : DotGraphBuilder
     {
+        public EdgedDotGraphBuilder(Graph graph) 
+        {
+            if (graph == null) 
+                throw new ArgumentNullException($"{nameof(graph)} can not be null");
+            if (graph.Edges == null || graph.Edges.Count() < 1) 
+                throw new ArgumentException($"{nameof(graph)} must contain at least one edge!");
+            Graph = graph;
+        }
+
         public DotGraphBuilder With(Action<DotGraphEdgeAttributesSetter> edgeAttributesChanges)
         {
-            var lastEdge = Graph?.Edges?.Last();
-            var edgeAttributetesSetter = new DotGraphEdgeAttributesSetter(lastEdge);
+            var lastGraphEdge = Graph.Edges.Last();
+            var edgeAttributetesSetter = new DotGraphEdgeAttributesSetter(lastGraphEdge);
             edgeAttributesChanges(edgeAttributetesSetter);
             return this;
         }
