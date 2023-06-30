@@ -46,41 +46,41 @@ namespace FluentApi.Graph
 
     public class NodedDotGraphBuilder : DotGraphBuilder
     {
-        public DotGraphBuilder With(Action<DotGraphNodeAttributesBuilder> nodeAttributesSetter)
+        public DotGraphBuilder With(Action<DotGraphNodeAttributesSetter> nodeAttributesChanges)
         {
             var lastNode = Graph?.Nodes?.Last();
-            var nodeAttributesBuilder = new DotGraphNodeAttributesBuilder(lastNode);
-            nodeAttributesSetter(nodeAttributesBuilder);
+            var nodeAttributesSetter = new DotGraphNodeAttributesSetter(lastNode);
+            nodeAttributesChanges(nodeAttributesSetter);
             return this;
         }
     }
 
-    public class DotGraphNodeAttributesBuilder
+    public class DotGraphNodeAttributesSetter
     {
         private Dictionary<string, string> Attributes { get; }
-        public DotGraphNodeAttributesBuilder(GraphNode node)
+        public DotGraphNodeAttributesSetter(GraphNode node)
         {
             if (node == null)
                 throw new ArgumentNullException(nameof(node));
             Attributes = node.Attributes;
         }
 
-        private DotGraphNodeAttributesBuilder AddAttribute(string name, string value)
+        private DotGraphNodeAttributesSetter AddAttribute(string name, string value)
         {
             Attributes.Add(name, value);
             return this;
         }
 
-        public DotGraphNodeAttributesBuilder Color(string color) =>
+        public DotGraphNodeAttributesSetter Color(string color) =>
             AddAttribute("color", color);
 
-        public DotGraphNodeAttributesBuilder FontSize(int fontSize) =>
+        public DotGraphNodeAttributesSetter FontSize(int fontSize) =>
             AddAttribute("fontsize", Convert.ToString(fontSize, CultureInfo.InvariantCulture));
 
-        public DotGraphNodeAttributesBuilder Label(string label) =>
+        public DotGraphNodeAttributesSetter Label(string label) =>
             AddAttribute("label", label);
 
-        public DotGraphNodeAttributesBuilder Shape(NodeShape shape)
+        public DotGraphNodeAttributesSetter Shape(NodeShape shape)
         {
             var shapeString = Convert
                 .ToString(shape, CultureInfo.InvariantCulture)
@@ -92,41 +92,41 @@ namespace FluentApi.Graph
 
     public class EdgedDotGraphBuilder : DotGraphBuilder
     {
-        public DotGraphBuilder With(Action<DotGraphEdgeAttributesBuilder> edgeAttributesSetter)
+        public DotGraphBuilder With(Action<DotGraphEdgeAttributesSetter> edgeAttributesChanges)
         {
             var lastEdge = Graph?.Edges?.Last();
-            var graphEdgeAttributesBuilder = new DotGraphEdgeAttributesBuilder(lastEdge);
-            edgeAttributesSetter(graphEdgeAttributesBuilder);
+            var edgeAttributetesSetter = new DotGraphEdgeAttributesSetter(lastEdge);
+            edgeAttributesChanges(edgeAttributetesSetter);
             return this;
         }
     }
 
-    public class DotGraphEdgeAttributesBuilder
+    public class DotGraphEdgeAttributesSetter
     {
         private Dictionary<string, string> Attributes { get; }
-        public DotGraphEdgeAttributesBuilder(GraphEdge graphEdge)
+        public DotGraphEdgeAttributesSetter(GraphEdge graphEdge)
         {
             if (graphEdge == null)
                 throw new ArgumentNullException(nameof(graphEdge));
             Attributes = graphEdge.Attributes;
         }
 
-        private DotGraphEdgeAttributesBuilder AddAttribute(string name, string value)
+        private DotGraphEdgeAttributesSetter AddAttribute(string name, string value)
         {
             Attributes.Add(name, value);
             return this;
         }
 
-        public DotGraphEdgeAttributesBuilder Color(string color) =>
+        public DotGraphEdgeAttributesSetter Color(string color) =>
              AddAttribute("color", color);
 
-        public DotGraphEdgeAttributesBuilder FontSize(int fontSize) =>
+        public DotGraphEdgeAttributesSetter FontSize(int fontSize) =>
             AddAttribute("fontsize", Convert.ToString(fontSize, CultureInfo.InvariantCulture));
 
-        public DotGraphEdgeAttributesBuilder Label(string label) =>
+        public DotGraphEdgeAttributesSetter Label(string label) =>
             AddAttribute("label", label);
 
-        public DotGraphEdgeAttributesBuilder Weight(double weight) =>
+        public DotGraphEdgeAttributesSetter Weight(double weight) =>
             AddAttribute("weight", Convert.ToString(weight, CultureInfo.InvariantCulture));
     }
 
