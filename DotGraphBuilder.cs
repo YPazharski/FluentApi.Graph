@@ -35,7 +35,7 @@ namespace FluentApi.Graph
         public NodedDotGraphBuilder AddNode(string nodeName)
         {
             Graph.AddNode(nodeName);
-            return new NodedDotGraphBuilder { Graph = Graph };
+            return new NodedDotGraphBuilder(Graph);
         }
 
         public string Build()
@@ -46,9 +46,18 @@ namespace FluentApi.Graph
 
     public class NodedDotGraphBuilder : DotGraphBuilder
     {
+        public NodedDotGraphBuilder(Graph graph)
+        {
+            if (graph == null)
+                throw new ArgumentNullException($"{nameof(graph)} can not be null");
+            if (graph.Nodes == null || graph.Nodes.Count() < 1)
+                throw new ArgumentException($"{nameof(graph)} must contain at least one edge!");
+            Graph = graph;
+        }
+
         public DotGraphBuilder With(Action<DotGraphNodeAttributesSetter> nodeAttributesChanges)
         {
-            var lastNode = Graph?.Nodes?.Last();
+            var lastNode = Graph.Nodes.Last();
             var nodeAttributesSetter = new DotGraphNodeAttributesSetter(lastNode);
             nodeAttributesChanges(nodeAttributesSetter);
             return this;
