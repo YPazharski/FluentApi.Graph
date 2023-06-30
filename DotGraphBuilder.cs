@@ -57,41 +57,76 @@ namespace FluentApi.Graph
             Graph = graph;
         }
 
-        public DotGraphBuilder With(Action<DotGraphNodeAttributesSetter> nodeAttributesChanges)
+        public DotGraphBuilder With(Action<LastNodeAttributesSetter> nodeAttributesChanges)
         {
-            var lastNode = Graph.Nodes.Last();
-            var nodeAttributesSetter = new DotGraphNodeAttributesSetter(lastNode);
+            var nodeAttributesSetter = new LastNodeAttributesSetter(Graph);
             nodeAttributesChanges(nodeAttributesSetter);
             return this;
         }
     }
 
-    public class DotGraphNodeAttributesSetter
+    public class EdgedDotGraphBuilder : DotGraphBuilder
     {
-        private Dictionary<string, string> Attributes { get; }
-        public DotGraphNodeAttributesSetter(GraphNode node)
+        public EdgedDotGraphBuilder(Graph graph)
         {
-            if (node == null)
-                throw new ArgumentNullException(nameof(node));
-            Attributes = node.Attributes;
+            if (graph == null)
+                throw new ArgumentNullException($"{nameof(graph)} can not be null");
+            if (graph.Edges == null || graph.Edges.Count() < 1)
+                throw new ArgumentException($"{nameof(graph)} must contain at least one edge!");
+            Graph = graph;
         }
 
-        private DotGraphNodeAttributesSetter AddAttribute(string name, string value)
+        public DotGraphBuilder With(Action<LastEdgeAttributesSetter> edgeAttributesChanges)
         {
-            Attributes.Add(name, value);
+            var edgeAttributetesSetter = new LastEdgeAttributesSetter(Graph);
+            edgeAttributesChanges(edgeAttributetesSetter);
             return this;
         }
+    }
 
-        public DotGraphNodeAttributesSetter Color(string color) =>
+    public abstract class DotGraphAttributesSetter<TSetter>
+        where TSetter : class
+    {
+        private protected Graph Graph { get; }
+        private protected abstract Dictionary<string, string> Attributes { get; }
+        private protected DotGraphAttributesSetter(Graph graph)
+        {
+            Graph = graph;
+        }
+
+        private protected TSetter AddAttribute(string name, string value)
+        {
+            Attributes.Add(name, value);
+            return this as TSetter;
+        }
+
+        public TSetter Color(string color) =>
             AddAttribute("color", color);
 
-        public DotGraphNodeAttributesSetter FontSize(int fontSize) =>
+        public TSetter FontSize(int fontSize) =>
             AddAttribute("fontsize", Convert.ToString(fontSize, CultureInfo.InvariantCulture));
 
-        public DotGraphNodeAttributesSetter Label(string label) =>
+        public TSetter Label(string label) =>
             AddAttribute("label", label);
+    }
 
-        public DotGraphNodeAttributesSetter Shape(NodeShape shape)
+    public class LastNodeAttributesSetter
+        : DotGraphAttributesSetter<LastNodeAttributesSetter>
+    {
+        public LastNodeAttributesSetter(Graph graph) : base(graph) 
+        {
+            if (graph == null)
+                throw new ArgumentNullException($"{nameof(graph)} can not be null");
+            if (graph.Nodes == null || graph.Nodes.Count() < 1)
+                throw new ArgumentException($"{nameof(graph)} must contain at least one edge!");
+        }
+
+        private protected override Dictionary<string, string> Attributes
+        {
+            get => Graph.Nodes.Last().Attributes;
+        }
+
+        public LastNodeAttributesSetter Shape(NodeShape shape)
         {
             var shapeString = Convert
                 .ToString(shape, CultureInfo.InvariantCulture)
@@ -101,52 +136,23 @@ namespace FluentApi.Graph
         }
     }
 
-    public class EdgedDotGraphBuilder : DotGraphBuilder
+    public class LastEdgeAttributesSetter
+        : DotGraphAttributesSetter<LastEdgeAttributesSetter>
     {
-        public EdgedDotGraphBuilder(Graph graph) 
+        public LastEdgeAttributesSetter(Graph graph) : base(graph) 
         {
-            if (graph == null) 
+            if (graph == null)
                 throw new ArgumentNullException($"{nameof(graph)} can not be null");
-            if (graph.Edges == null || graph.Edges.Count() < 1) 
+            if (graph.Edges == null || graph.Edges.Count() < 1)
                 throw new ArgumentException($"{nameof(graph)} must contain at least one edge!");
-            Graph = graph;
         }
 
-        public DotGraphBuilder With(Action<DotGraphEdgeAttributesSetter> edgeAttributesChanges)
+        private protected override Dictionary<string, string> Attributes
         {
-            var lastGraphEdge = Graph.Edges.Last();
-            var edgeAttributetesSetter = new DotGraphEdgeAttributesSetter(lastGraphEdge);
-            edgeAttributesChanges(edgeAttributetesSetter);
-            return this;
-        }
-    }
-
-    public class DotGraphEdgeAttributesSetter
-    {
-        private Dictionary<string, string> Attributes { get; }
-        public DotGraphEdgeAttributesSetter(GraphEdge graphEdge)
-        {
-            if (graphEdge == null)
-                throw new ArgumentNullException(nameof(graphEdge));
-            Attributes = graphEdge.Attributes;
+            get => Graph.Edges.Last().Attributes;
         }
 
-        private DotGraphEdgeAttributesSetter AddAttribute(string name, string value)
-        {
-            Attributes.Add(name, value);
-            return this;
-        }
-
-        public DotGraphEdgeAttributesSetter Color(string color) =>
-             AddAttribute("color", color);
-
-        public DotGraphEdgeAttributesSetter FontSize(int fontSize) =>
-            AddAttribute("fontsize", Convert.ToString(fontSize, CultureInfo.InvariantCulture));
-
-        public DotGraphEdgeAttributesSetter Label(string label) =>
-            AddAttribute("label", label);
-
-        public DotGraphEdgeAttributesSetter Weight(double weight) =>
+        public LastEdgeAttributesSetter Weight(double weight) =>
             AddAttribute("weight", Convert.ToString(weight, CultureInfo.InvariantCulture));
     }
 
